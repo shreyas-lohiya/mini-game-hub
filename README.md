@@ -1,8 +1,10 @@
 # Mini Game Hub
 
-## Ritwik Khandelwal and Shreyas Lohiya
+## Contributors
+- Ritwik Khandelwal
+- Shreyas Lohiya
 
-A secure,password protected multi-user game hub built using **Bash**,**Python**, and **Pygame**, where two authenticated players can choose from multiple board games, play via a GUI, and track results on a leaderboard.
+#### A secure,password protected multi-user game hub built using **Bash**, **Python**, and **Pygame**, where two authenticated players can choose from multiple board games, play via a GUI, and track results on a leaderboard.
 
 ## Features
 ### - User Authentication (Bash)
