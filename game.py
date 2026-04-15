@@ -1,28 +1,27 @@
 import sys
 import os
-import numpy
+import numpy as np
 import pygame
 import matplotlib.pyplot as plt
 import csv
 
 class Game:
     def __init__(self,p1,p2,r,c):
-        self.p=[p1,p2]
+        self.p1=p1
+        self.p2=p2
         self.turn=0
-        self.board=numpy.zeros((r,c))
+        self.board=np.full((r,c),-1)
         self.r=r
         self.c=c
-    def current(self):
-        return self.p[self.turn]
     def switch_turn(self):
         self.turn=1-self.turn
-    def win_check(self):
+    def win_check(self,i,j):
         raise NotImplementedError
     def draw_check(self):
         raise NotImplementedError
-    def valid_check(self):
+    def valid_check(self,i,j):
         raise NotImplementedError
-    def move(self,row,col):
+    def move(self,i,j):
         raise NotImplementedError
     
 class GameEngine:
@@ -35,6 +34,10 @@ class GameEngine:
             choice=self.menu()
             game=self.load(choice)
             winner=game.play()
+            if winner=="ly":
+                print ("The Game is Draw")
+            else :
+                print ("The winner is "+winner)
 
             if not self.play_again():
                 break
