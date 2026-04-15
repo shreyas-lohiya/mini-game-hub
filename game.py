@@ -34,7 +34,7 @@ class GameEngine:
             choice=self.menu()
             game=self.load(choice)
             winner=game.play()
-            if winner=="ly":
+            if winner=="DRW":
                 print ("The Game is Draw")
             else :
                 print ("The winner is "+winner)

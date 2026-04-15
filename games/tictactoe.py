@@ -107,7 +107,7 @@ class TicTacToe(Game):
                                         return self.p2
                                 self.switch_turn()
                                 if self.draw_check():
-                                    return "ly"
+                                    return "DRW"
             pygame.display.flip()
 
         

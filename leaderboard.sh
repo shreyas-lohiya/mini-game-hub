@@ -1,56 +1,94 @@
 #!/bin/bash
 clear
+clear
+printf "\033[32m"
+cat << 'EOF'
+
+██╗     ███████╗ █████╗ ██████╗ ███████╗██████╗ ██████╗  ██████╗  █████╗ ██████╗ ██████╗ 
+██║     ██╔════╝██╔══██╗██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔═══██╗██╔══██╗██╔══██╗██╔══██╗
+██║     █████╗  ███████║██║  ██║█████╗  ██████╔╝██████╔╝██║   ██║███████║██████╔╝██║  ██║
+██║     ██╔══╝  ██╔══██║██║  ██║██╔══╝  ██╔══██╗██╔══██╗██║   ██║██╔══██║██╔══██╗██║  ██║
+███████╗███████╗██║  ██║██████╔╝███████╗██║  ██║██████╔╝╚██████╔╝██║  ██║██║  ██║██████╔╝
+╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ 
+
+EOF
 games="tictactoe othello connect4"
 metric=$1
-sort_option="-n -k8,8r -k4,4r"
-[[ "$metric" -eq 1 ]] && sort_option="-n -k4,4r -k6,6"
-[[ "$metric" -eq 2 ]] && sort_option="-n -k6,6r -k4,4"
+(($metric==1)) && sort_option="-k1,1"
+(($metric==2)) && sort_option="-n -k2,2r -k4,4"
+(($metric==3)) && sort_option="-n -k3,3r -k6,6"
+(($metric==4)) && sort_option="-n -k4,4r -k6,6"
+(($metric==5)) && sort_option="-n -k8,8r -k6,6"
 for game in $games; do
-    echo
-    echo ${game^^}
-    echo
+    printf "\033[1;35m\n${game^^}\n\n\033[0m"
     awk -v game="$game" '
     BEGIN {
         FS=","
+        OFS=","
     }
-    $4==game {
+    $4==game && $5=="False" {
         data[$1]["win"]++
         data[$2]["loss"]++
     }
+    $4==game && $5=="True" {
+        data[$1]["draw"]++
+        data[$2]["draw"]++
+    }
     END {
         for(i in data){
-            print "▌",i,"▌",data[i]["win"]+0,"▌",data[i]["loss"]+0,"▌",(data[i]["loss"]+0 == 0) ? "inf" : (data[i]["win"]+0)/(data[i]["loss"]+0), (data[i]["win"]+0)/(data[i]["loss"]+0+data[i]["win"]),"▐"
+            print i,data[i]["win"]+0,data[i]["draw"]+0,data[i]["loss"]+0,(data[i]["win"]+0)/(data[i]["win"]+data[i]["draw"]+data[i]["loss"]),(data[i]["draw"]+0)/(data[i]["win"]+data[i]["draw"]+data[i]["loss"]),(data[i]["loss"]+0)/(data[i]["win"]+data[i]["draw"]+data[i]["loss"]),(data[i]["loss"]+0 == 0) ? "inf" : (data[i]["win"]+0)/(data[i]["loss"]+0),""
         }
     }
-    ' history.csv | sort $sort_option | cut -d " " -f 1,2,3,4,5,6,7,8,10 | (echo "▌ User ▌ Wins ▌ Losses ▌ Wins/Losses ▐"; cat -;) | column -t -o "   " | awk -F'▌' '
-    START {
-        
-    }
+    ' history.csv | sort $sort_option | (echo "User,Wins,Draws,Losses,Win%,Draw%,Loss%,Wins/Losses,"; cat -;) | column -t -s "," -o "    ▐ " | awk -F"▐" '
     NR==1 {
+        temp=0
+        for(i=1;i<=NF;i++){
+            temp+=length($i)+1
+            arr[temp]
+        }
+        for(i in arr){
+        
+        }
+        printf "\033[34m▛"
         for (i=0;i<length;i++) {
-            if (i==length($1) || i==length($1)+length($2)+1 || i==length($1)+length($2)+length($3)+2 || i==length($1)+length($2)+length($3)+length($4)+3 || i==length($1)+length($2)+length($3)+length($4)+length($5)+4) printf "▛"
-            else if(i<length-1) printf "▀"
-            else printf "▜"
+            if (i in arr) printf "▜"
+            else printf "▀"
         }
         print ""
-        print
+        printf "▌ "
+        for (i=1;i<NF;i++) {
+            printf "\033[31m"$i"\033[34m" "▐"
+        }
+        printf "\033[31m"$NF"\033[34m"
+        print ""
+        printf "\033[34m▙"
         for (i=0;i<length;i++) {
-            if (i==length($1) || i==length($1)+length($2)+1 || i==length($1)+length($2)+length($3)+2 || i==length($1)+length($2)+length($3)+length($4)+3 || i==length($1)+length($2)+length($3)+length($4)+length($5)+4) printf "▙"
-            else if(i<length-1) printf "▄"
-            else printf "▟"
+            if (i in arr) printf "▟"
+            else printf "▄"
         }
         print ""
     }
     NR!=1 {
-        print
+        printf "▌ "
+        for (i=1;i<NF;i++) {
+            printf "\033[36m"$i"\033[34m" "▐"
+        }
+        printf "\033[36m"$NF"\033[34m"
+        print ""
     }
     END {
+        printf "\033[34m▙"
         for (i=0;i<length;i++) {
-            if (i==length($1) || i==length($1)+length($2)+1 || i==length($1)+length($2)+length($3)+2 || i==length($1)+length($2)+length($3)+length($4)+3 || i==length($1)+length($2)+length($3)+length($4)+length($5)+4) printf "▙"
-            else if(i<length-1) printf "▄"
-            else printf "▟"
+            if (i in arr) printf "▟"
+            else printf "▄"
         }
         print ""
     }
     '
+done
+while true; do
+    read -rsn1 key
+    if [[ -z $key ]]; then
+        break
+    fi
 done
