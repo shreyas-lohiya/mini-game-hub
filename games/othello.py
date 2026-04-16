@@ -2,7 +2,7 @@ import numpy as np
 import pygame
 from game import Game
 
-grid_size           = 4
+grid_size           = 8
 res                 = (1280,720)
 grid_unit           = 80
 grid_width          = 1
@@ -10,7 +10,7 @@ grid_color          = (0,100,50)
 grid_border_color   = (0,40,0)
 bg_color            = (205,200,200)
 chip_radius         = 20
-earthquake          = True
+earthquake          = False
 flip_animate_time   = 0.25
 
 class Othello(Game):
@@ -61,7 +61,7 @@ class Othello(Game):
             rect = surface2.get_rect(center=(base_pos.x+row*grid_unit+grid_unit/2,base_pos.y+col*grid_unit+grid_unit/2))
             screen.blit(surface2, rect)
             pygame.display.flip()
-            t = t+clock.tick(600) / 1000
+            t = t+clock.tick(600)/1000
         self.board[row,col]=1-self.board[row,col]
     def outflank_dirn(self,row,col,dirn,mode='check'):
         if dirn[0]==0:

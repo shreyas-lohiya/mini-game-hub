@@ -53,9 +53,10 @@ class GameEngine:
         pygame.display.set_caption("Mini Game Hub")
         font = pygame.font.SysFont("segoeui", 36)
         buttons = {
-        "Tic-Tac-Toe": pygame.Rect(510,230,250,60),
-        "Othello": pygame.Rect(510,325,250,60),
-        "Connect4": pygame.Rect(510,420,250,60)
+        "Tic-Tac-Toe": pygame.Rect(510,200,300,60),
+        "Othello": pygame.Rect(510,290,300,60),
+        "Connect4": pygame.Rect(510,380,300,60),
+        "Chain-Reaction": pygame.Rect(510,470,300,60)
         }
         texts = {}
         for name, rect in buttons.items():
@@ -98,6 +99,9 @@ class GameEngine:
         elif c == "Connect4":
             from games.connect4 import Connect4
             return Connect4(self.p1,self.p2)
+        elif c == "Chain-Reaction":
+            from games.chainreaction import ChainRxn
+            return ChainRxn(self.p1,self.p2)
     
     def play_again(self):
         pass

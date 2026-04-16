@@ -67,9 +67,9 @@ class TicTacToe(Game):
                 rect=pygame.Rect(left,top,cell_w,cell_h)
                 cells.append(rect)
         
-        x_img=pygame.image.load("x.png")
+        x_img=pygame.image.load("images/x.png")
         x_resized_img = pygame.transform.scale(x_img,(cell_w-2,cell_h-2))
-        o_img=pygame.image.load("o.png")
+        o_img=pygame.image.load("images/o.png")
         o_resized_img = pygame.transform.scale(o_img,(cell_w-2,cell_h-2))
         x_img.set_colorkey((0,0,18))
         o_img.set_colorkey((0,0,18))
