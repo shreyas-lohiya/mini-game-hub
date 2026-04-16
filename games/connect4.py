@@ -7,10 +7,10 @@ from game import Game
 
 class Connect4(Game):
 
-    def __init__(self,p1,p2):
+    def __init__(self,p1,p2,screen):
         self.p1=p1
         self.p2=p2
-        super().__init__(p1,p2,7,7)
+        super().__init__(p1,p2,7,7,screen)
     
     def dirn(self,i,j,k,dirn):
         indice = numpy.arange(-k+1,k)
@@ -53,11 +53,9 @@ class Connect4(Game):
         return i
 
     def play(self):
-        pygame.init()
         res = (1280,720)
         bg_color = (0,0,18)
         line_color = (200,200,200)
-        screen = pygame.display.set_mode(res)
         pygame.display.set_caption("Connect4")
 
         cells = []
@@ -77,23 +75,22 @@ class Connect4(Game):
         t2_img = pygame.transform.scale(token2_img,(cell_w-2,cell_h-2))
 
         while True:
-            screen.fill(bg_color)
+            self.screen.fill(bg_color)
             for rect in cells:
-                pygame.draw.rect(screen,line_color,rect,1) 
+                pygame.draw.rect(self.screen,line_color,rect,1) 
             mouse_pos = pygame.mouse.get_pos()
             for i in range(self.r):
                 for j in range(self.c):
                     if self.board[i][j] == 0:
                         rect = cells[i*self.c+j]
-                        screen.blit(t1_img,(rect.left+1,rect.top+1))
+                        self.screen.blit(t1_img,(rect.left+1,rect.top+1))
                     if self.board[i][j] == 1:
                         rect = cells[i*self.c + j]
-                        screen.blit(t2_img,(rect.left+1,rect.top+1))
+                        self.screen.blit(t2_img,(rect.left+1,rect.top+1))
                     
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+                    return None
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         x = event.pos[0]

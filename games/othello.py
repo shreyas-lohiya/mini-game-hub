@@ -2,8 +2,7 @@ import numpy as np
 import pygame
 from game import Game
 
-grid_size           = 8
-res                 = (1280,720)
+grid_size           = 4
 grid_unit           = 80
 grid_width          = 1
 grid_color          = (0,100,50)
@@ -12,10 +11,11 @@ bg_color            = (205,200,200)
 chip_radius         = 20
 earthquake          = False
 flip_animate_time   = 0.25
+fps                 = 60
 
 class Othello(Game):
-    def __init__(self,p1,p2):
-        super().__init__(p1,p2,grid_size,grid_size)
+    def __init__(self,p1,p2,screen):
+        super().__init__(p1,p2,grid_size,grid_size,screen)
         self.board[grid_size//2][grid_size//2]=1
         self.board[grid_size//2-1][grid_size//2-1]=1
         self.board[grid_size//2][grid_size//2-1]=0
@@ -50,18 +50,18 @@ class Othello(Game):
         old_color = (255*(1-self.turn),255*(1-self.turn),255*(1-self.turn))
         new_color = (255*self.turn,255*self.turn,255*self.turn)
         while t<flip_animate_time:
-            pygame.draw.rect(screen,grid_color,(base_pos.x+int(row)*grid_unit,base_pos.y+int(col)*grid_unit,grid_unit,grid_unit))
-            pygame.draw.rect(screen,grid_border_color,(base_pos.x+int(row)*grid_unit,base_pos.y+int(col)*grid_unit,grid_unit,grid_unit),width=grid_width)
+            pygame.draw.rect(self.screen,grid_color,(self.base_pos.x+int(row)*grid_unit,self.base_pos.y+int(col)*grid_unit,grid_unit,grid_unit))
+            pygame.draw.rect(self.screen,grid_border_color,(self.base_pos.x+int(row)*grid_unit,self.base_pos.y+int(col)*grid_unit,grid_unit,grid_unit),width=grid_width)
             angle=np.pi*(t/flip_animate_time)
             height=abs(2*chip_radius*np.cos(angle))
             surface = pygame.Surface((2*chip_radius, 2*chip_radius))
             surface.fill(grid_color)
             pygame.draw.ellipse(surface, new_color if angle>np.pi/2 else old_color,(0,chip_radius-height/2,2*chip_radius,height))
             surface2 = pygame.transform.rotate(surface, 30)
-            rect = surface2.get_rect(center=(base_pos.x+row*grid_unit+grid_unit/2,base_pos.y+col*grid_unit+grid_unit/2))
-            screen.blit(surface2, rect)
+            rect = surface2.get_rect(center=(self.base_pos.x+row*grid_unit+grid_unit/2,self.base_pos.y+col*grid_unit+grid_unit/2))
+            self.screen.blit(surface2, rect)
             pygame.display.flip()
-            t = t+clock.tick(600)/1000
+            t += self.clock.tick(fps)/1000
         self.board[row,col]=1-self.board[row,col]
     def outflank_dirn(self,row,col,dirn,mode='check'):
         if dirn[0]==0:
@@ -125,42 +125,37 @@ class Othello(Game):
         self.outflank_dirn(row,col,(1,0),'do')
         self.outflank_dirn(row,col,(1,1),'do')
     def play(self):
-        pygame.init()
-        pygame.mixer.music.load("music/Phonk_sample.ogg")
-        pygame.mixer.music.play() 
-        global screen
-        screen = pygame.display.set_mode(size=res)
+        pygame.mixer.music.load("music/Phonk.ogg")
+        pygame.mixer.music.play()
         bg = pygame.image.load('images/background.png')
-        bg = pygame.transform.scale(bg, screen.get_size())
+        bg = pygame.transform.scale(bg, self.screen.get_size())
         pygame.display.set_caption("OTHELLO")
-        global clock
-        clock = pygame.time.Clock()
-        dt = 0
-        global base_pos
-        base_pos = pygame.Vector2(screen.get_width() / 2 - grid_unit*grid_size/2, screen.get_height() / 2 - grid_unit*grid_size/2)
-        mean_pos = base_pos.copy()
+        self.clock = pygame.time.Clock()
+        self.base_pos = pygame.Vector2(self.screen.get_width() / 2 - grid_unit*grid_size/2, self.screen.get_height() / 2 - grid_unit*grid_size/2)
+        mean_pos = self.base_pos.copy()
         running = True
         while running:
-            screen.fill(bg_color)
-            screen.blit(bg,(0,0))
-            pygame.draw.rect(screen,grid_color,(base_pos.x-grid_width,base_pos.y-grid_width,grid_unit*grid_size+2*grid_width,grid_unit*grid_size+2*grid_width),width=0,border_radius=grid_width)
-            pygame.draw.rect(screen,grid_border_color,(base_pos.x-grid_width,base_pos.y-grid_width,grid_unit*grid_size+2*grid_width,grid_unit*grid_size+2*grid_width),width=grid_width,border_radius=grid_width)
+            dt = self.clock.tick(fps)/1000
+            self.screen.fill(bg_color)
+            self.screen.blit(bg,(0,0))
+            pygame.draw.rect(self.screen,grid_color,(self.base_pos.x-grid_width,self.base_pos.y-grid_width,grid_unit*grid_size+2*grid_width,grid_unit*grid_size+2*grid_width),width=0,border_radius=grid_width)
+            pygame.draw.rect(self.screen,grid_border_color,(self.base_pos.x-grid_width,self.base_pos.y-grid_width,grid_unit*grid_size+2*grid_width,grid_unit*grid_size+2*grid_width),width=grid_width,border_radius=grid_width)
             for i in range(grid_size):
                 for j in range(grid_size):
-                    pygame.draw.rect(screen,grid_border_color,(base_pos.x+i*grid_unit,base_pos.y+j*grid_unit,grid_unit,grid_unit),width=grid_width)
+                    pygame.draw.rect(self.screen,grid_border_color,(self.base_pos.x+i*grid_unit,self.base_pos.y+j*grid_unit,grid_unit,grid_unit),width=grid_width)
                     if self.board[i,j]==0:
-                        pygame.draw.circle(screen,"black",(base_pos.x+i*grid_unit+grid_unit/2,base_pos.y+j*grid_unit+grid_unit/2),chip_radius)
+                        pygame.draw.circle(self.screen,"black",(self.base_pos.x+i*grid_unit+grid_unit/2,self.base_pos.y+j*grid_unit+grid_unit/2),chip_radius)
                     elif self.board[i,j]==1:
-                        pygame.draw.circle(screen,"white",(base_pos.x+i*grid_unit+grid_unit/2,base_pos.y+j*grid_unit+grid_unit/2),chip_radius)
+                        pygame.draw.circle(self.screen,"white",(self.base_pos.x+i*grid_unit+grid_unit/2,self.base_pos.y+j*grid_unit+grid_unit/2),chip_radius)
 
-            pygame.draw.circle(screen,(255*self.turn,255*self.turn,255*self.turn),pygame.mouse.get_pos(),chip_radius)
-            i=int((pygame.mouse.get_pos()[0]-base_pos.x)//grid_unit)
-            j=int((pygame.mouse.get_pos()[1]-base_pos.y)//grid_unit)
+            pygame.draw.circle(self.screen,(255*self.turn,255*self.turn,255*self.turn),pygame.mouse.get_pos(),chip_radius)
+            i=int((pygame.mouse.get_pos()[0]-self.base_pos.x)//grid_unit)
+            j=int((pygame.mouse.get_pos()[1]-self.base_pos.y)//grid_unit)
             if i>=0 and i<grid_size and j>=0 and j<grid_size:
                 if self.valid_check(i,j):
-                    pygame.draw.rect(screen,"cyan",(base_pos.x+i*grid_unit,base_pos.y+j*grid_unit,grid_unit,grid_unit),width=grid_width)
+                    pygame.draw.rect(self.screen,"cyan",(self.base_pos.x+i*grid_unit,self.base_pos.y+j*grid_unit,grid_unit,grid_unit),width=grid_width)
                 else:
-                    pygame.draw.rect(screen,"red",(base_pos.x+i*grid_unit,base_pos.y+j*grid_unit,grid_unit,grid_unit),width=grid_width)
+                    pygame.draw.rect(self.screen,"red",(self.base_pos.x+i*grid_unit,self.base_pos.y+j*grid_unit,grid_unit,grid_unit),width=grid_width)
 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_w] :
@@ -174,19 +169,18 @@ class Othello(Game):
             if earthquake :
                 randx=2*np.random.rand()-1
                 randy=2*np.random.rand()-1
-                base_pos.x = mean_pos.x + 600 * dt * randx
-                base_pos.y = mean_pos.y + 600 * dt * randy
+                self.base_pos.x = mean_pos.x + 600 * dt * randx
+                self.base_pos.y = mean_pos.y + 600 * dt * randy
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    return None
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    i=int(event.pos[0]-base_pos.x)//grid_unit
-                    j=int(event.pos[1]-base_pos.y)//grid_unit
+                    i=int(event.pos[0]-self.base_pos.x)//grid_unit
+                    j=int(event.pos[1]-self.base_pos.y)//grid_unit
                     if self.valid_check(i,j):
                         self.move(i,j)
                         if not self.switch_turn():
                             return self.win_check()
             pygame.display.flip()
-            dt = clock.tick(6000)/1000
-        pygame.quit()
+            

@@ -7,10 +7,10 @@ from game import Game
 
 class ChainRxn(Game):
 
-    def __init__(self,p1,p2):
+    def __init__(self,p1,p2,screen):
         self.p1=p1
         self.p2=p2
-        super().__init__(p1,p2,6,9)
+        super().__init__(p1,p2,6,9,screen)
         self.board=np.zeros((6,9))
 
     def pop(self,i,j):
@@ -74,11 +74,9 @@ class ChainRxn(Game):
                 self.move(i,j+1)
 
     def play(self):
-        pygame.init()
         res = (1280,720)
         bg_color = (0,0,18)
         line_color = (200,200,200)
-        screen = pygame.display.set_mode(res)
         pygame.display.set_caption("Chain-Reaction")
 
         cells = []
@@ -106,35 +104,34 @@ class ChainRxn(Game):
         green3_resized_img = pygame.transform.scale(green3_img,(cell_w-2,cell_h-2))
         
         while True:
-            screen.fill(bg_color)
+            self.screen.fill(bg_color)
             for rect in cells:
-                pygame.draw.rect(screen,line_color,rect,1) 
+                pygame.draw.rect(self.screen,line_color,rect,1) 
             mouse_pos = pygame.mouse.get_pos()
             for i in range(self.r):
                 for j in range(self.c):
                     if self.board[i][j] == 1:
                         rect = cells[i*self.c + j]
-                        screen.blit(red1_resized_img,(rect.left+1,rect.top+1))
+                        self.screen.blit(red1_resized_img,(rect.left+1,rect.top+1))
                     if self.board[i][j] == 2:
                         rect = cells[i*self.c + j]
-                        screen.blit(red2_resized_img,(rect.left+1,rect.top+1))
+                        self.screen.blit(red2_resized_img,(rect.left+1,rect.top+1))
                     if self.board[i][j] == 3:
                         rect = cells[i*self.c + j]
-                        screen.blit(red3_resized_img,(rect.left+1,rect.top+1))
+                        self.screen.blit(red3_resized_img,(rect.left+1,rect.top+1))
                     if self.board[i][j] == -1:
                         rect = cells[i*self.c + j]
-                        screen.blit(green1_resized_img,(rect.left+1,rect.top+1))
+                        self.screen.blit(green1_resized_img,(rect.left+1,rect.top+1))
                     if self.board[i][j] == -2:
                         rect = cells[i*self.c + j]
-                        screen.blit(green2_resized_img,(rect.left+1,rect.top+1))
+                        self.screen.blit(green2_resized_img,(rect.left+1,rect.top+1))
                     if self.board[i][j] == -3:
                         rect = cells[i*self.c + j]
-                        screen.blit(green3_resized_img,(rect.left+1,rect.top+1))
+                        self.screen.blit(green3_resized_img,(rect.left+1,rect.top+1))
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+                    return None
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for rect in cells:
                         if rect.collidepoint(mouse_pos):

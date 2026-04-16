@@ -1,6 +1,5 @@
 #!/bin/bash
 clear
-clear
 printf "\033[32m"
 cat << 'EOF'
 
@@ -12,8 +11,9 @@ cat << 'EOF'
 ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ 
 
 EOF
-games="tictactoe othello connect4"
+games="Tic-Tac-Toe Othello Connect4 Chain-Reaction"
 metric=$1
+sort_option=""
 (($metric==1)) && sort_option="-k1,1"
 (($metric==2)) && sort_option="-n -k2,2r -k4,4"
 (($metric==3)) && sort_option="-n -k3,3r -k6,6"
@@ -36,7 +36,11 @@ for game in $games; do
     }
     END {
         for(i in data){
-            print i,data[i]["win"]+0,data[i]["draw"]+0,data[i]["loss"]+0,(data[i]["win"]+0)/(data[i]["win"]+data[i]["draw"]+data[i]["loss"]),(data[i]["draw"]+0)/(data[i]["win"]+data[i]["draw"]+data[i]["loss"]),(data[i]["loss"]+0)/(data[i]["win"]+data[i]["draw"]+data[i]["loss"]),(data[i]["loss"]+0 == 0) ? "inf" : (data[i]["win"]+0)/(data[i]["loss"]+0),""
+            win_p=100*(data[i]["win"]+0)/(data[i]["win"]+data[i]["draw"]+data[i]["loss"])
+            draw_p=100*(data[i]["draw"]+0)/(data[i]["win"]+data[i]["draw"]+data[i]["loss"])
+            loss_p=100*(data[i]["loss"]+0)/(data[i]["win"]+data[i]["draw"]+data[i]["loss"])
+            wbyl=(data[i]["loss"]+0 == 0) ? "inf" : (data[i]["win"]+0)/(data[i]["loss"]+0)
+            print i,data[i]["win"]+0,data[i]["draw"]+0,data[i]["loss"]+0,win_p,draw_p,loss_p,wbyl,""
         }
     }
     ' history.csv | sort $sort_option | (echo "User,Wins,Draws,Losses,Win%,Draw%,Loss%,Wins/Losses,"; cat -;) | column -t -s "," -o "    ▐ " | awk -F"▐" '
@@ -86,9 +90,4 @@ for game in $games; do
     }
     '
 done
-while true; do
-    read -rsn1 key
-    if [[ -z $key ]]; then
-        break
-    fi
-done
+sleep 5
