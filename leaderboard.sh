@@ -13,12 +13,12 @@ cat << 'EOF'
 EOF
 games="Tic-Tac-Toe Othello Connect4 Chain-Reaction"
 metric=$1
-sort_option=""
-(($metric==1)) && sort_option="-k1,1"
-(($metric==2)) && sort_option="-n -k2,2r -k4,4"
-(($metric==3)) && sort_option="-n -k3,3r -k6,6"
-(($metric==4)) && sort_option="-n -k4,4r -k6,6"
-(($metric==5)) && sort_option="-n -k8,8r -k6,6"
+[[ $metric == "Username" ]] && sort_option="-k1,1"
+[[ $metric == "Wins" ]] && sort_option="-n -k2,2r -k4,4 -k3,3"
+[[ $metric == "Win percent" ]] && sort_option="-k5,5r -k7,7"
+[[ $metric == "Losses" ]] && sort_option="-n -k4,4r -k2,2 -k3,3r"
+[[ $metric == "Loss percent" ]] && sort_option="-k7,7r -k5,5"
+[[ $metric == "Wins/Losses" ]] && sort_option="-g -k8,8r -k2,2 -k3,3"
 for game in $games; do
     printf "\033[1;35m\n${game^^}\n\n\033[0m"
     awk -v game="$game" '
@@ -40,10 +40,10 @@ for game in $games; do
             draw_p=100*(data[i]["draw"]+0)/(data[i]["win"]+data[i]["draw"]+data[i]["loss"])
             loss_p=100*(data[i]["loss"]+0)/(data[i]["win"]+data[i]["draw"]+data[i]["loss"])
             wbyl=(data[i]["loss"]+0 == 0) ? "inf" : (data[i]["win"]+0)/(data[i]["loss"]+0)
-            print i,data[i]["win"]+0,data[i]["draw"]+0,data[i]["loss"]+0,win_p,draw_p,loss_p,wbyl,""
+            printf "%s,%d,%d,%d,%8.4f,%8.4f,%8.4f,%s,\n", i,data[i]["win"]+0,data[i]["draw"]+0,data[i]["loss"]+0,win_p,draw_p,loss_p,wbyl
         }
     }
-    ' history.csv | sort $sort_option | (echo "User,Wins,Draws,Losses,Win%,Draw%,Loss%,Wins/Losses,"; cat -;) | column -t -s "," -o "    ▐ " | awk -F"▐" '
+    ' history.csv | sort -t ',' $sort_option | (echo "Username,Wins,Draws,Losses,Win%,Draw%,Loss%,Wins/Losses,"; cat -;) | column -t -s "," -o "    ▐ " | awk -F"▐" '
     NR==1 {
         temp=0
         for(i=1;i<=NF;i++){
@@ -90,4 +90,3 @@ for game in $games; do
     }
     '
 done
-sleep 5

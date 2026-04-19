@@ -250,7 +250,7 @@ while true; do
     if ((var==2)); then
         printtitle
         printf "By which metric do you want it to be sorted:\n"
-        choose "Username" "Wins" "Draws" "Losses" "Wins/Losses"
+        choose "Username" "Wins" "Win percent" "Losses" "Loss percent" "Wins/Losses"
         bash leaderboard.sh $?
     else
         break
