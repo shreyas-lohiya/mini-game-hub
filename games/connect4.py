@@ -1,23 +1,65 @@
-import numpy as np
+import sys
+import os
+import numpy
 import pygame
 
-from game import Game,Button
+from game import Game
 
+res = (1280,720)
+bg_color = (0,0,18)
+line_color = (200,200,200)
 fps=60
+fall_time=1
 
 class Connect4(Game):
 
-    def __init__(self,p1,p2,screen,theme):
-        super().__init__(p1,p2,7,7,screen,theme)
+    def __init__(self,p1,p2,screen):
+        self.p1=p1
+        self.p2=p2
+        super().__init__(p1,p2,7,7,screen)
+    
+    def anim_yellow_token(self, x, y):
+        fx = x + 40
+        sy = 40
+        fy = y + 40
+
+        pos_y = sy
+        speed = 800
+
+        while True:
+            dt = self.clock.tick(60) /1000
+            pos_y += speed * dt
+            if(pos_y>=fy):
+                pos_y = fy
+            self.screen.fill(bg_color)
+            pygame.draw.circle(self.screen,"yellow",(fx,int(pos_y)),35)
+
+            self.screen.blit(self.board_surface, (360,80))
+
+            pygame.display.update()
+
+            if pos_y==fy:
+                break
+        self.running=True
+    
+    def yellow_token(self,x,y):
+        cx=x+40 
+        cy=y+40
+        pygame.draw.circle(self.screen,"yellow",(cx, cy),35)
+    
+    def red_token(self,x,y):
+        cx=x+40 
+        cy=y+40
+        pygame.draw.circle(self.screen,"red",(cx, cy),35)
     
     def dirn(self,i,j,k,dirn):
-        indice = np.arange(-k+1,k)
+        indice = numpy.arange(-k+1,k)
         x = i+dirn[0]*indice
         y = j+dirn[1]*indice
         mask = (x>=0)&(x<self.r)&(y>=0)&(y<self.c)
         line = self.board[x[mask], y[mask]]
-        fin = np.where(line==self.turn,1,0)
-        if np.any(np.convolve(fin,np.ones(k),'valid')==k):
+        fin = numpy.where(line==self.turn,1,0)
+        if numpy.any(numpy.convolve(fin,numpy.ones(k),'valid')==k):
             return True
         else:
             return False
@@ -51,17 +93,12 @@ class Connect4(Game):
         return i
 
     def play(self):
-        res = (1280,720)
-        bg_color = (0,0,18)
-        line_color = (200,200,200)
-        quitscreen=False
-        resultscreen=False
-        drawclaimed=False
         pygame.display.set_caption("Connect4")
 
         cells = []
         cell_w = int(560/self.c)
         cell_h = int(560/self.r)
+        self.clock = pygame.time.Clock()
 
         for x in range(self.r):
             for y in range(self.c):
@@ -69,107 +106,89 @@ class Connect4(Game):
                 top=80+x*cell_h
                 rect=pygame.Rect(left,top,cell_w,cell_h)
                 cells.append(rect)
-        
-        token1_img=pygame.image.load("images/token1.png")
-        t1_img = pygame.transform.scale(token1_img,(cell_w-2,cell_h-2))
-        token2_img=pygame.image.load("images/token2.png")
-        t2_img = pygame.transform.scale(token2_img,(cell_w-2,cell_h-2))
+        self.board_surface = pygame.Surface([560,560],pygame.SRCALPHA)
+        self.board_surface.fill((0, 0, 255, 255))
+        for row in range(self.r):
+            for col in range(self.c):
+                x = col * cell_w + cell_w/2
+                y = row * cell_h + cell_h/2
+                pygame.draw.circle(self.board_surface,(0, 0, 0, 0),(x, y),35)
 
-        while True:
-            dt = self.clock.tick(fps)/1000
+        self.running=True
+        while self.running:
             self.screen.fill(bg_color)
-            self.screen.blit(self.bg,(0,0))
-            for rect in cells:
-                pygame.draw.rect(self.screen,line_color,rect,1) 
+            self.screen.blit(self.board_surface, (360,80)) 
             mouse_pos = pygame.mouse.get_pos()
             for i in range(self.r):
                 for j in range(self.c):
                     if self.board[i][j] == 0:
                         rect = cells[i*self.c+j]
-                        self.screen.blit(t1_img,(rect.left+1,rect.top+1))
+                        self.red_token(rect.left+1,rect.top+1)
                     if self.board[i][j] == 1:
                         rect = cells[i*self.c + j]
-                        self.screen.blit(t2_img,(rect.left+1,rect.top+1))
-            player1=self.font.render(f"{self.p1}", True, (200, 200, 200))
-            self.screen.blit(player1, player1.get_rect(center=(self.screen.get_width()/2-400,120)))
-            player2=self.font.render(f"{self.p2}", True, (200, 200, 200))
-            self.screen.blit(player2, player2.get_rect(center=(self.screen.get_width()/2+400,120)))
-            self.btnresign1.draw(pygame.mouse.get_pos(),dt,self.screen)
-            self.btnresign2.draw(pygame.mouse.get_pos(),dt,self.screen)
-            self.btnclaimdraw1.draw(pygame.mouse.get_pos(),dt,self.screen)
-            self.btnclaimdraw2.draw(pygame.mouse.get_pos(),dt,self.screen)
-            if quitscreen :
-                title=self.font.render("You sure you wanna quit ?", True, (200, 200, 200))
-                title = pygame.transform.scale_by(title,1+0.05*np.sin(pygame.time.get_ticks()/200))
-                self.screen.blit(title, title.get_rect(center=(self.screen.get_width()/2,120)))
-                self.btnquityes.draw(pygame.mouse.get_pos(),dt,self.screen)
-                self.btnquitno.draw(pygame.mouse.get_pos(),dt,self.screen)
-            elif resultscreen :
-                if result=="DRW":
-                    title=self.font.render("DRAW", True, (200, 200, 200))
-                    title = pygame.transform.scale_by(title,1+0.05*np.sin(pygame.time.get_ticks()/200))
-                    self.screen.blit(title, title.get_rect(center=(self.screen.get_width()/2,self.screen.get_height()/2)))
-                else:
-                    title=self.font.render(f"WINNER IS {result}", True, (200, 200, 200))
-                    title = pygame.transform.scale_by(title,1+0.05*np.sin(pygame.time.get_ticks()/200))
-                    self.screen.blit(title, title.get_rect(center=(self.screen.get_width()/2,self.screen.get_height()/2)))
-                self.btnproceedresult.draw(pygame.mouse.get_pos(),dt,self.screen)
-            elif drawclaimed:
-                title=self.font.render(f"{whoclaimdraw} claimed draw", True, (200, 200, 200))
-                title = pygame.transform.scale_by(title,1+0.05*np.sin(pygame.time.get_ticks()/200))
-                self.screen.blit(title, title.get_rect(center=(self.screen.get_width()/2,self.screen.get_height()/2)))
-                self.btnacceptdraw.draw(pygame.mouse.get_pos(),dt,self.screen)
-                self.btnrejectdraw.draw(pygame.mouse.get_pos(),dt,self.screen)
+                        self.yellow_token(rect.left+1,rect.top+1)
+                    
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    quitscreen=True
+                    return None
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if quitscreen:
-                        if self.btnquityes.pressed(pygame.mouse.get_pos()):
-                            return None
-                        elif self.btnquitno.pressed(pygame.mouse.get_pos()):
-                            quitscreen=False
-                    elif resultscreen:
-                        if self.btnproceedresult.pressed(pygame.mouse.get_pos()):
-                            return result
-                    elif drawclaimed:
-                        if self.btnacceptdraw.pressed(pygame.mouse.get_pos()):
-                            result = "DRW"
-                            resultscreen=True
-                        elif self.btnrejectdraw.pressed(pygame.mouse.get_pos()):
-                            drawclaimed=False
-                    elif self.btnresign1.pressed(pygame.mouse.get_pos()):
-                        result = self.p2
-                        resultscreen = True
-                    elif self.btnresign2.pressed(pygame.mouse.get_pos()):
-                        result = self.p1
-                        resultscreen = True
-                    elif self.btnclaimdraw1.pressed(pygame.mouse.get_pos()):
-                        whoclaimdraw = self.p1
-                        drawclaimed = True
-                    elif self.btnclaimdraw2.pressed(pygame.mouse.get_pos()):
-                        whoclaimdraw = self.p2
-                        drawclaimed = True
-                    else:
-                        x = event.pos[0]
-                        j = int((x - 360) // cell_w)
-                        if 0 <= j < self.c and self.valid_check(j):
-                            i = self.move(j)
-                            if self.win_check(i,j):
-                                if self.turn==0:
-                                    result = self.p1
-                                    resultscreen = True
-                                else:
-                                    result = self.p2
-                                    resultscreen = True
-                            self.switch_turn()
-                            if self.draw_check():
-                                result = "DRW"
-                                resultscreen = True
+                    x = event.pos[0]
+                    j = int((x - 360) // cell_w)
+                    if 0 <= j < self.c and self.valid_check(j):
+                        i = self.move(j)
+                        rect = cells[i*self.c + j]
+
+                        if self.turn == 0:
+                            colour = "red"
+                        else:
+                            colour = "yellow"
+
+                        fx = rect.left + 40
+                        fy = rect.top + 40
+                        sy = 80
+                        pos_y = sy
+                        speed = 400
+
+                        self.board[i][j] = -1
+
+                        while True:
+                            dt = self.clock.tick(60) / 1000
+
+                            if pos_y >= fy:
+                                pos_y = fy
+
+                            for event2 in pygame.event.get():
+                                if event2.type == pygame.QUIT:
+                                    pygame.quit()
+                                    sys.exit()
+
+                            self.screen.fill(bg_color)
+
+                            for r in range(self.r):
+                                for c in range(self.c):
+                                    if self.board[r][c] == 0:
+                                        rrect = cells[r*self.c + c]
+                                        self.red_token(rrect.left+1, rrect.top+1)
+                                    elif self.board[r][c] == 1:
+                                        rrect = cells[r*self.c + c]
+                                        self.yellow_token(rrect.left+1, rrect.top+1)
+
+                            pygame.draw.circle(self.screen, colour, (fx, int(pos_y)), 35)
+                            self.screen.blit(self.board_surface, (360, 80))
+                            pygame.display.update()
+
+                            if pos_y == fy:
+                                break
+                            pos_y += speed * dt
+
+                        self.board[i][j] = self.turn
+
+                        if self.win_check(i, j):
+                            return self.p1 if self.turn == 0 else self.p2
+
+                        self.switch_turn()
+
+                        if self.draw_check():
+                            return "DRW"
+    
             pygame.display.flip()
-    
-    
-
-        
-    
-
