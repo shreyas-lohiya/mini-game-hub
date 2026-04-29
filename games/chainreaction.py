@@ -13,8 +13,8 @@ animate_time = 0.2
 class ChainRxn(Game):
     #fills board with zeros, makes a capacity array for easy acess of getting to know which one is at edge or in the middle,
     #sets an array containing elements that need to get animated, the last time animation was called
-    def __init__(self,p1,p2,screen,theme):
-        super().__init__(p1,p2,b_height,b_width,70,14,screen,theme)
+    def __init__(self,p1,p2,screen,theme,boardshaking):
+        super().__init__(p1,p2,b_height,b_width,70,14,screen,theme,boardshaking)
         self.board=np.zeros((b_height,b_width))
         self.capacity=np.zeros((b_height,b_width))
         for i in range(self.r):

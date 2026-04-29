@@ -47,8 +47,17 @@ class GameEngine:
             if theme is None: #player quits the theme selection screen
                 continue
             
+            #choose whether board should shake or not
+            boardshakingchoice=menu(self.screen,"Want an Earthquake?","Yes","No")
+            if boardshakingchoice is None:
+                continue
+            elif boardshakingchoice=="Yes":
+                boardshaking=True
+            else:
+                boardshaking=False
+                
             #loads the game plays that specific game and stores winner(or result), then stops the music started by the game, resets the caption changed by the game
-            game=self.load(choice,theme)
+            game=self.load(choice,theme,boardshaking)
             winner=game.play()
             pygame.mixer.music.stop()
             pygame.display.set_caption("Mini Game Hub")
@@ -79,15 +88,15 @@ class GameEngine:
                     return
     
     #loads the game     
-    def load(self,c,theme):
+    def load(self,c,theme,boardshaking):
         if c == "Tic-Tac-Toe":
-            return TicTacToe(self.p1,self.p2,self.screen,theme)
+            return TicTacToe(self.p1,self.p2,self.screen,theme,boardshaking)
         elif c == "Othello":
-            return Othello(self.p1,self.p2,self.screen,theme)
+            return Othello(self.p1,self.p2,self.screen,theme,boardshaking)
         elif c == "Connect4":
-            return Connect4(self.p1,self.p2,self.screen,theme)
+            return Connect4(self.p1,self.p2,self.screen,theme,boardshaking)
         elif c == "Chain-Reaction":
-            return ChainRxn(self.p1,self.p2,self.screen,theme)
+            return ChainRxn(self.p1,self.p2,self.screen,theme,boardshaking)
     
     #shows leaderboard
     def leaderboard(self):

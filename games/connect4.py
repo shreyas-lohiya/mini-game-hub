@@ -3,8 +3,8 @@ import pygame
 
 from games.game_template import Game
 
-b_height            = 8
-b_width             = 8
+b_height            = 7
+b_width             = 7
 fps=60
 line_color = (200,200,200)
 fall_acc=1500
@@ -18,8 +18,8 @@ buffer_time = 0.5
 
 class Connect4(Game):
     #sets the last time animation was called,last move, boolean indicating whether win animation is active along with caption
-    def __init__(self,p1,p2,screen,theme):
-        super().__init__(p1,p2,b_height,b_width,80,35,screen,theme)
+    def __init__(self,p1,p2,screen,theme,boardshaking):
+        super().__init__(p1,p2,b_height,b_width,80,35,screen,theme,boardshaking)
         self.last_animate_time=0
         self.last_move=None
         self.win_animation_active=False

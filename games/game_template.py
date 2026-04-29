@@ -6,7 +6,7 @@ fps=60
 
 class Game:
     #sets player names, whose turn, no. of row, cols, intial board, screen, background,cell,piece radius in original size, button images,things that get updated on screen resize, clock, music, and special screens related variables 
-    def __init__(self,p1,p2,r,c,cell_size_original,piece_radius_original,screen,theme):
+    def __init__(self,p1,p2,r,c,cell_size_original,piece_radius_original,screen,theme,boardshaking):
         self.p1=p1
         self.p2=p2
         self.turn=0
@@ -25,7 +25,7 @@ class Game:
         self.quitscreen=False
         self.resultscreen=False
         self.drawclaimed=False
-        self.boardshaking=False
+        self.boardshaking=boardshaking
         
     #sets things that are updated on resizing the board
     def update(self):

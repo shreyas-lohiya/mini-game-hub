@@ -13,8 +13,8 @@ buffer_time = 0.5
 
 class TicTacToe(Game):
     #loads the images for cross and circle and sets boolean indicating whether win animation is active along with caption
-    def __init__(self,p1,p2,screen,theme):
-        super().__init__(p1,p2,b_height,b_width,60,58,screen,theme) 
+    def __init__(self,p1,p2,screen,theme,boardshaking):
+        super().__init__(p1,p2,b_height,b_width,60,58,screen,theme,boardshaking) 
         self.x_img=pygame.image.load("images/x.png")
         self.o_img=pygame.image.load("images/o.png")
         self.x_img.set_colorkey((0,0,18))

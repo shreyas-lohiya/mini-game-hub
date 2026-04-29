@@ -12,8 +12,8 @@ fps                 = 60
 
 class Othello(Game):
     #sets up intial board and an array containing elements that need to get animated, the last time animation was called, along with caption
-    def __init__(self,p1,p2,screen,theme):
-        super().__init__(p1,p2,b_height,b_width,70,20,screen,theme)
+    def __init__(self,p1,p2,screen,theme,boardshaking):
+        super().__init__(p1,p2,b_height,b_width,70,20,screen,theme,boardshaking)
         self.board[self.r//2-1][self.c//2-1]=1
         self.board[self.r//2][self.c//2-1]=0
         self.board[self.r//2-1][self.c//2]=0
