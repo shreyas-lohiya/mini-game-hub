@@ -31,9 +31,9 @@ class ChainRxn(Game):
     
     #checks win by checking if the board is full of only one color and that color's total number of balls is>1
     def win_check(self):
-        if np.all(self.baord>=0) and np.sum(self.board>0)>1:
+        if np.all(self.board>=0) and np.sum(self.board>0)>1:
             return True
-        elif np.all(self.baord<=0) and np.sum(self.board<0)>1:
+        elif np.all(self.board<=0) and np.sum(self.board<0)>1:
             return True
         else:
             return False
