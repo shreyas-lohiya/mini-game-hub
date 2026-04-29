@@ -17,6 +17,7 @@ class TicTacToe(Game):
         super().__init__(p1,p2,b_height,b_width,60,58,screen,theme,boardshaking) 
         self.x_img=pygame.image.load("images/x.png")
         self.o_img=pygame.image.load("images/o.png")
+        self.board_img=pygame.image.load("images/board.png")
         self.x_img.set_colorkey((0,0,18))
         self.o_img.set_colorkey((0,0,18))
         self.win_animation_active=False
@@ -117,6 +118,8 @@ class TicTacToe(Game):
     def drawboard(self):
         self.x_resized_img = pygame.transform.scale(self.x_img,(self.piece_radius,self.piece_radius))
         self.o_resized_img = pygame.transform.scale(self.o_img,(self.piece_radius,self.piece_radius))
+        self.board_resized_img = pygame.transform.scale(self.board_img,(self.cell_size*self.r,self.cell_size*self.c))
+        self.screen.blit(self.board_resized_img,(self.base_pos.x,self.base_pos.y))
         for i in range(self.r):
             for j in range(self.c):
                 rect = pygame.draw.rect(self.screen,line_color,(self.base_pos.x+j*self.cell_size,self.base_pos.y+i*self.cell_size,self.cell_size,self.cell_size),width=grid_width)
