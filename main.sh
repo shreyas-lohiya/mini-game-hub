@@ -286,6 +286,7 @@ while true; do
         printf "By which metric do you want it to be sorted:\n"
         choose "Username" "Wins" "Win percent" "Losses" "Loss percent" "Wins/Losses"
         bash leaderboard.sh $?
+        read -rsn1 key; return #waits till any key is pressed
     else
         break
     fi

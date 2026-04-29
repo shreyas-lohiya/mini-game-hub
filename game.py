@@ -256,7 +256,7 @@ def main():
     if welcomescreen(screen):
         engine=GameEngine(player1,player2,screen)
         engine.run()
-    thankyouscreen()
+    thankyouscreen(screen)
     pygame.quit()
     
 if __name__ == "__main__":

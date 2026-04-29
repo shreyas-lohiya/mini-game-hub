@@ -3,7 +3,6 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \usepackage{enumitem}
-\usepackage{titlesec}
 \usepackage{parskip}
 \usepackage{booktabs}
 \usepackage{array}
@@ -17,9 +16,6 @@
 \definecolor{accent}{RGB}{50, 90, 160}
 \definecolor{codegray}{RGB}{245,245,245}
 \definecolor{codetxt}{RGB}{40,40,40}
-
-\titleformat{\section}{\large\bfseries\color{accent}}{}{0em}{}[\titlerule]
-\titleformat{\subsection}{\normalsize\bfseries}{}{0em}{}
 
 % Header/footer
 \pagestyle{fancy}
@@ -145,7 +141,7 @@ After authentication the Python engine presents a game-selection menu followed b
 
 \texttt{"Futuristic","Retro","Space","new-theme-name")}
 
-\subsection{Resizable Pygame window} : All board positions, cell sizes, fonts, and button geometry scale with the window to make it look playable and resize the side according to your preference at the same time.
+\subsection{Resizable Pygame window} All board positions, cell sizes, fonts, and button geometry scale with the window to make it look playable and resize the side according to your preference at the same time.
 
 \subsection{Chain Reaction}
 Chain-Reaction is implemented in addition to the three specified games, it is a cult classic phone game which has an interesting recursive logic and a decent animation implementation.
@@ -160,6 +156,7 @@ Accessible both from the shell (before launching Python) and from the post-game 
 Four matplotlib views: Top 5 Players (bar chart), Total Wins (pie), Most Played Games (pie), and a PvP heat map showing the net win differential between every pair of players. Plots are saved to a temporary PNG and displayed inside the pygame window.
 
 \subsection{Animation as time-based interpolation} Animations (falling tokens in Connect4, flipping discs in Othello, exploding orbs in Chain Reaction, win-line drawing in Tic-Tac-Toe / Connect4) are driven by elapsed wall-clock time rather than frame counters, so they behave consistently regardless of frame rate.
+\newpage
 %% ─── 4. DIRECTORY STRUCTURE ──────────────────────────────────────────────────
 \section{Directory Structure}
 
@@ -181,9 +178,13 @@ mini-game-hub/
 |   |-- menu.py          # Reusable option-menu screen
 |   |-- welcome.py       # Welcome splash screen
 |   `-- thankyou.py      # Exit / thank-you screen
-|-- images/              # Background PNGs per theme; X/O/board token images
+|-- images/              # Background PNGs per theme; X/O/board token images; jpegs for report
 |-- audio/               # .ogg background music tracks (one per theme)
-`-- fonts/               # BlackgothRegular.otf display font
+|-- fonts/               # BlackgothRegular.otf display font
+|-- Makefile             # Makefile for pdflatex
+|-- report.tex           # Latex report code
+`-- report.pdf           # Latex report pdf
+
 \end{lstlisting}
 
 %% ─── 5. INSTALLATION & SETUP ─────────────────────────────────────────────────
@@ -212,7 +213,7 @@ chmod +x main.sh leaderboard.sh
 \end{lstlisting}
 
 \textbf{Assets:} The \texttt{images/}, \texttt{audio/}, and \texttt{fonts/} directories must be present alongside the scripts.
-
+\newpage
 %% ─── 6. USAGE ────────────────────────────────────────────────────────────────
 \section{Usage}
 
@@ -286,7 +287,7 @@ Run \texttt{./main.sh} from the project root in a terminal. The shell script wal
 \item \textbf{Undo/take-back mechanic.} Maintain a move stack per game and allow both players to agree to undo the last move -- useful for casual play. Also the move stack could be used for reviewing game like in chess for analysis later.
 
 \end{enumerate}
-
+\newpage
 %% ─── 8. REFERENCES ───────────────────────────────────────────────────────────
 \section{References}
 
