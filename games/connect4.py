@@ -1,65 +1,50 @@
-import sys
-import os
-import numpy
+import numpy as np
 import pygame
 
 from game import Game
 
-res = (1280,720)
-bg_color = (0,0,18)
-line_color = (200,200,200)
 fps=60
-fall_time=1
+line_color = (200,200,200)
+fall_acc=1500
+coeff_restitution=0.4
+max_bounces=4
+speed=800
+tplen=0.005
+trans_color = (67,67,67)
+grid_color = (0,120,255)
+buffer_time = 0.5
 
 class Connect4(Game):
 
-    def __init__(self,p1,p2,screen):
-        self.p1=p1
-        self.p2=p2
-        super().__init__(p1,p2,7,7,screen)
-    
-    def anim_yellow_token(self, x, y):
-        fx = x + 40
-        sy = 40
-        fy = y + 40
+    def __init__(self,p1,p2,screen,theme):
+        self.cell_size_original=80
+        super().__init__(p1,p2,7,7,screen,theme)
+        pygame.display.set_caption("Connect4")
+        token1_img=pygame.image.load("images/token1.png")
+        self.t1_img = pygame.transform.scale(token1_img,(self.cell_size-2,self.cell_size-2))
+        token2_img=pygame.image.load("images/token2.png")
+        self.t2_img = pygame.transform.scale(token2_img,(self.cell_size-2,self.cell_size-2))
+        self.last_animate_time=0
+        self.last_move=None
+        self.win_animation_active=False
 
-        pos_y = sy
-        speed = 800
-
-        while True:
-            dt = self.clock.tick(60) /1000
-            pos_y += speed * dt
-            if(pos_y>=fy):
-                pos_y = fy
-            self.screen.fill(bg_color)
-            pygame.draw.circle(self.screen,"yellow",(fx,int(pos_y)),35)
-
-            self.screen.blit(self.board_surface, (360,80))
-
-            pygame.display.update()
-
-            if pos_y==fy:
-                break
-        self.running=True
-    
-    def yellow_token(self,x,y):
-        cx=x+40 
-        cy=y+40
-        pygame.draw.circle(self.screen,"yellow",(cx, cy),35)
-    
-    def red_token(self,x,y):
-        cx=x+40 
-        cy=y+40
-        pygame.draw.circle(self.screen,"red",(cx, cy),35)
-    
     def dirn(self,i,j,k,dirn):
-        indice = numpy.arange(-k+1,k)
-        x = i+dirn[0]*indice
-        y = j+dirn[1]*indice
-        mask = (x>=0)&(x<self.r)&(y>=0)&(y<self.c)
-        line = self.board[x[mask], y[mask]]
-        fin = numpy.where(line==self.turn,1,0)
-        if numpy.any(numpy.convolve(fin,numpy.ones(k),'valid')==k):
+        indice = np.arange(0,k)
+        x_1 = i+dirn[0]*indice
+        y_1 = j+dirn[1]*indice
+        x_2 = i-dirn[0]*indice
+        y_2 = j-dirn[1]*indice
+        mask_1 = (x_1>=0)&(x_1<self.r)&(y_1>=0)&(y_1<self.c)
+        mask_2 = (x_2>=0)&(x_2<self.r)&(y_2>=0)&(y_2<self.c)
+        line_1 = np.where(self.board[x_1[mask_1], y_1[mask_1]]==self.turn,1,0)
+        line_2 = np.where(self.board[x_2[mask_2], y_2[mask_2]]==self.turn,1,0)
+        s_1=np.where(line_1==0)[0]
+        s_2=np.where(line_2==0)[0]
+        k_1=s_1[0]-1 if s_1.size>0 else line_1.size - 1
+        k_2=s_2[0]-1 if s_2.size>0 else line_2.size - 1
+        if(k_1+k_2+1>=k):
+            self.end_1 = (i + dirn[0] * k_1, j + dirn[1] * k_1)
+            self.end_2 = (i - dirn[0] * k_2, j - dirn[1] * k_2)
             return True
         else:
             return False
@@ -77,118 +62,114 @@ class Connect4(Game):
             return False
         
     def draw_check(self):
-        if (self.board == -1).sum() == 0:
-            return True
-        else:
-            return False
+        return np.all(self.board != -1)
         
     def valid_check(self,j):
-        return self.board[0][j]==-1 
+        return 0<=j<self.c and self.board[0][j]==-1
     
     def move(self,j):
+        self.last_animate_time=pygame.time.get_ticks()/1000
         i=self.r-1
         while i>=0 and self.board[i][j]!=-1 :
             i=i-1
         self.board[i][j]=self.turn
-        return i
+        self.last_move=(i,j)
 
-    def play(self):
-        pygame.display.set_caption("Connect4")
+    def drawline(self):
+        if not self.win_animation_active:
+            return
 
-        cells = []
-        cell_w = int(560/self.c)
-        cell_h = int(560/self.r)
-        self.clock = pygame.time.Clock()
+        s_row, s_col = self.end_1
+        e_row, e_col = self.end_2
+        
+        strt = np.array([
+            self.base_pos.x + s_col * self.cell_size + self.cell_size // 2, 
+            self.base_pos.y + s_row * self.cell_size + self.cell_size // 2])
+        
+        edn = np.array([
+            self.base_pos.x + e_col * self.cell_size + self.cell_size // 2, 
+            self.base_pos.y + e_row * self.cell_size + self.cell_size // 2])
 
-        for x in range(self.r):
-            for y in range(self.c):
-                left=360+y*cell_w
-                top=80+x*cell_h
-                rect=pygame.Rect(left,top,cell_w,cell_h)
-                cells.append(rect)
-        self.board_surface = pygame.Surface([560,560],pygame.SRCALPHA)
-        self.board_surface.fill((0, 0, 255, 255))
-        for row in range(self.r):
-            for col in range(self.c):
-                x = col * cell_w + cell_w/2
-                y = row * cell_h + cell_h/2
-                pygame.draw.circle(self.board_surface,(0, 0, 0, 0),(x, y),35)
+        dist = np.linalg.norm(edn - strt)
+        draw_duration = tplen * dist
+        
+        current_time = pygame.time.get_ticks() / 1000.0
+        t = current_time - self.win_animation_start
 
-        self.running=True
-        while self.running:
-            self.screen.fill(bg_color)
-            self.screen.blit(self.board_surface, (360,80)) 
-            mouse_pos = pygame.mouse.get_pos()
-            for i in range(self.r):
-                for j in range(self.c):
-                    if self.board[i][j] == 0:
-                        rect = cells[i*self.c+j]
-                        self.red_token(rect.left+1,rect.top+1)
-                    if self.board[i][j] == 1:
-                        rect = cells[i*self.c + j]
-                        self.yellow_token(rect.left+1,rect.top+1)
-                    
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    return None
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    x = event.pos[0]
-                    j = int((x - 360) // cell_w)
-                    if 0 <= j < self.c and self.valid_check(j):
-                        i = self.move(j)
-                        rect = cells[i*self.c + j]
+        progress = min(1.0, t / draw_duration) if draw_duration > 0 else 1.0
+        current_tip = strt + (edn - strt) * progress
 
-                        if self.turn == 0:
-                            colour = "red"
-                        else:
-                            colour = "yellow"
+        temp_surface = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA)
+        alpha = int(50 + (100 *((np.sin(pygame.time.get_ticks() / 150) + 1) / 2)))
+        pygame.draw.line(temp_surface, (0, 120, 255,alpha), strt, current_tip, width=15)
+        self.screen.blit(temp_surface, (0, 0))
 
-                        fx = rect.left + 40
-                        fy = rect.top + 40
-                        sy = 80
-                        pos_y = sy
-                        speed = 400
+        if t >= draw_duration + buffer_time:
+            pygame.draw.line(temp_surface, (0, 120, 255,0), strt, current_tip, width=15)
+            self.screen.blit(temp_surface, (0, 0))
+            self.win_animation_active = False
+            self.result = self.p1 if self.turn == 0 else self.p2
+            self.resultscreen = True
 
-                        self.board[i][j] = -1
+    def drawfallingball(self,r,c):
+        color = "red" if self.board[r][c] == 0 else "yellow"
+        t=pygame.time.get_ticks()/1000-self.last_animate_time
+        cx = self.base_pos.x + c * self.cell_size + self.cell_size/2
+        groundbasey = self.base_pos.y + r * self.cell_size + self.cell_size
+        topbasey = self.base_pos.y
+        t_bounce=2*np.sqrt(2*(groundbasey-topbasey)/fall_acc)
+        t+=t_bounce/2
+        vel=np.sqrt(2*fall_acc*(groundbasey-topbasey))
+        t_sum_bounces=0
+        count=0
+        while t_bounce<t:
+            t-=t_bounce
+            if count>max_bounces:
+                cy = groundbasey - self.cell_size/2
+                pygame.draw.circle(self.screen,color,(cx, cy), 35)
+                return
+            vel*=coeff_restitution
+            t_bounce*=coeff_restitution
+            count+=1
+        baseposfromgroundy=vel*t-0.5*fall_acc*t*t
+        cy=groundbasey-baseposfromgroundy-self.cell_size/2
+        pygame.draw.circle(self.screen,color,(cx, cy), 35)
 
-                        while True:
-                            dt = self.clock.tick(60) / 1000
+    def drawboard(self):
+        self.board_surface = pygame.Surface((self.cell_size*self.c,self.cell_size*self.r))
+        self.board_surface.fill(grid_color)
+        self.board_surface.set_colorkey(trans_color)
+        for r in range(self.r):
+            for c in range(self.c):
+                cx = c * self.cell_size + self.cell_size/2
+                cy = r * self.cell_size + self.cell_size/2
+                pygame.draw.circle(self.board_surface, trans_color, (cx, cy), 35)
+        for r in range(self.r):
+            for c in range(self.c):
+                cx = self.base_pos.x + c * self.cell_size + self.cell_size/2
+                cy = self.base_pos.y + r * self.cell_size + self.cell_size/2
+                if self.board[r][c] != -1 and (r,c)!=self.last_move:
+                    color = "red" if self.board[r][c] == 0 else "yellow"
+                    pygame.draw.circle(self.screen, color, (cx, cy), 35)
+        if self.last_move is not None:
+            self.drawfallingball(self.last_move[0],self.last_move[1])
+        self.screen.blit(self.board_surface,self.base_pos)
 
-                            if pos_y >= fy:
-                                pos_y = fy
+        if self.win_animation_active:
+            self.drawline()
 
-                            for event2 in pygame.event.get():
-                                if event2.type == pygame.QUIT:
-                                    pygame.quit()
-                                    sys.exit()
-
-                            self.screen.fill(bg_color)
-
-                            for r in range(self.r):
-                                for c in range(self.c):
-                                    if self.board[r][c] == 0:
-                                        rrect = cells[r*self.c + c]
-                                        self.red_token(rrect.left+1, rrect.top+1)
-                                    elif self.board[r][c] == 1:
-                                        rrect = cells[r*self.c + c]
-                                        self.yellow_token(rrect.left+1, rrect.top+1)
-
-                            pygame.draw.circle(self.screen, colour, (fx, int(pos_y)), 35)
-                            self.screen.blit(self.board_surface, (360, 80))
-                            pygame.display.update()
-
-                            if pos_y == fy:
-                                break
-                            pos_y += speed * dt
-
-                        self.board[i][j] = self.turn
-
-                        if self.win_check(i, j):
-                            return self.p1 if self.turn == 0 else self.p2
-
-                        self.switch_turn()
-
-                        if self.draw_check():
-                            return "DRW"
-    
-            pygame.display.flip()
+    def specificmousepressevents(self,eventpos):
+        j=int((eventpos[0]-self.base_pos.x)//self.cell_size)
+        i=int((eventpos[1]-self.base_pos.y)//self.cell_size)
+        if self.resultscreen or self.win_animation_active:
+            return
+        if self.valid_check(j):
+            self.move(j)
+            if self.win_check(self.last_move[0],self.last_move[1]):
+                self.win_animation_active = True
+                self.win_animation_start = pygame.time.get_ticks() / 1000.0
+            elif self.draw_check():
+                self.result = "DRW"
+                self.resultscreen = True
+            else:
+                self.switch_turn()
