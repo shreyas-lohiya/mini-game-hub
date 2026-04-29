@@ -1,8 +1,10 @@
 import numpy as np
 import pygame
 
-from game import Game
+from games.game_template import Game
 
+b_height            = 10
+b_width             = 10
 fps=60 
 line_color = (200,200,200)
 grid_width=1
@@ -10,17 +12,24 @@ tplen=0.005
 buffer_time = 0.5
 
 class TicTacToe(Game):
-
+    #loads the images for cross and circle and sets boolean indicating whether win animation is active along with caption
     def __init__(self,p1,p2,screen,theme):
-        self.cell_size_original=60
-        super().__init__(p1,p2,10,10,screen,theme)
-        pygame.display.set_caption("Tic-Tac-Toe")  
+        super().__init__(p1,p2,b_height,b_width,60,58,screen,theme) 
         self.x_img=pygame.image.load("images/x.png")
         self.o_img=pygame.image.load("images/o.png")
         self.x_img.set_colorkey((0,0,18))
         self.o_img.set_colorkey((0,0,18))
         self.win_animation_active=False
+        pygame.display.set_caption("Tic-Tac-Toe")
 
+    #checks win or not along a specific direction also stores the value for animation if someone wins later
+    #x_1 is x coordinates if we move along the given direction, index being given in the indices
+    #similarly x_2 is in the opposite dirn, and y_1 y_2 are similarly defined for the y coordinate
+    #masks are used to only restrict to the values that are valid in the cell
+    #line_1,line_2 store 1,0 depending on whether the token is of the player from whom whichever we are checking the win
+    #then k_1, k_2 are calculated which are the indices farthest away from the current cell (i,j) and till which all the cells have same token as self.turn
+    #which is also number of cells from the current cells having same token as self.turn
+    #then we simply compare k_1+1+k_2 with k to determine win
     def dirn(self,i,j,k,dirn):
         indice = np.arange(0,k)
         x_1 = i+dirn[0]*indice
@@ -42,6 +51,7 @@ class TicTacToe(Game):
         else:
             return False
 
+    #checks win by iterating over each direction
     def win_check(self,i,j,k=5):
         if self.dirn(i,j,k,[0,1]):
             return True
@@ -53,16 +63,20 @@ class TicTacToe(Game):
             return True
         else:
             return False
-        
+    
+    #draw when whole board is filled and no cell is -1
     def draw_check(self):
         return np.all(self.board!=-1)
-        
-    def valid_check(self,i,j):
-        return self.board[i][j]==-1
     
+    #checks if turn is valid  by checking it is within bounds and the cell is empty
+    def valid_check(self,i,j):
+        return 0<=i<self.r and 0<=j<self.c and self.board[i][j]==-1
+    
+    #updates the board
     def move(self,i,j):
         self.board[i][j]=self.turn
 
+    #draws line if win animation is active, and sets the result once the animation is ended
     def drawline(self):
         if not self.win_animation_active:
             return
@@ -99,9 +113,10 @@ class TicTacToe(Game):
             self.result = self.p1 if self.turn == 0 else self.p2
             self.resultscreen = True
     
+    #draws the board along with the animating line in case someone wins
     def drawboard(self):
-        self.x_resized_img = pygame.transform.scale(self.x_img,(self.cell_size-2,self.cell_size-2))
-        self.o_resized_img = pygame.transform.scale(self.o_img,(self.cell_size-2,self.cell_size-2))
+        self.x_resized_img = pygame.transform.scale(self.x_img,(self.piece_radius,self.piece_radius))
+        self.o_resized_img = pygame.transform.scale(self.o_img,(self.piece_radius,self.piece_radius))
         for i in range(self.r):
             for j in range(self.c):
                 rect = pygame.draw.rect(self.screen,line_color,(self.base_pos.x+j*self.cell_size,self.base_pos.y+i*self.cell_size,self.cell_size,self.cell_size),width=grid_width)
@@ -109,14 +124,16 @@ class TicTacToe(Game):
                     self.screen.blit(self.x_resized_img,(rect.left+1,rect.top+1))
                 elif self.board[i][j] == 1:
                     self.screen.blit(self.o_resized_img,(rect.left+1,rect.top+1))
-        
+                    
         if self.win_animation_active:
             self.drawline()
 
+    #sees if win animation is active or not, if not then
+    #calculates which cell is trying to get placed upon, sees validity,
+    #then it moves and switches turn while checking win and draw
     def specificmousepressevents(self, eventpos):
-        if self.resultscreen or self.win_animation_active:
+        if self.win_animation_active:
             return
-        
         j=int((eventpos[0]-self.base_pos.x)//self.cell_size)
         i=int((eventpos[1]-self.base_pos.y)//self.cell_size)
         if self.valid_check(i,j) :

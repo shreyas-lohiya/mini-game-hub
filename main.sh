@@ -1,4 +1,10 @@
 #!/bin/bash
+
+###############################################
+############## HELPER FUNCTIONS ###############
+###############################################
+
+#reads password into local output and returns it, while desplaying dots(•) on the terminal 
 readpass(){
     local output=""
     while read -rsn1 char; do
@@ -16,25 +22,27 @@ readpass(){
     done
     echo "$output"
 }
+
+#prints title "MINI GAME HUB" as ascii art at the top of the terminal
 printtitle() {
     clear
-    printf "\033[32m"
-    cat << 'EOF'
+    printf "\033[34m"
+    printf "
 
-   ▄▄▄▄███▄▄▄▄    ▄█  ███▄▄▄▄    ▄█          ▄██████▄     ▄████████   ▄▄▄▄███▄▄▄▄      ▄████████         ▄█    █▄    ███    █▄  ▀█████████▄  
- ▄██▀▀▀███▀▀▀██▄ ███  ███▀▀▀██▄ ███         ███    ███   ███    ███ ▄██▀▀▀███▀▀▀██▄   ███    ███        ███    ███   ███    ███   ███    ███ 
- ███   ███   ███ ███▌ ███   ███ ███▌        ███    █▀    ███    ███ ███   ███   ███   ███    █▀         ███    ███   ███    ███   ███    ███ 
- ███   ███   ███ ███▌ ███   ███ ███▌       ▄███          ███    ███ ███   ███   ███  ▄███▄▄▄           ▄███▄▄▄▄███▄▄ ███    ███  ▄███▄▄▄██▀  
- ███   ███   ███ ███▌ ███   ███ ███▌      ▀▀███ ████▄  ▀███████████ ███   ███   ███ ▀▀███▀▀▀          ▀▀███▀▀▀▀███▀  ███    ███ ▀▀███▀▀▀██▄  
- ███   ███   ███ ███  ███   ███ ███         ███    ███   ███    ███ ███   ███   ███   ███    █▄         ███    ███   ███    ███   ███    ██▄ 
- ███   ███   ███ ███  ███   ███ ███         ███    ███   ███    ███ ███   ███   ███   ███    ███        ███    ███   ███    ███   ███    ███ 
-  ▀█   ███   █▀  █▀    ▀█   █▀  █▀          ████████▀    ███    █▀   ▀█   ███   █▀    ██████████        ███    █▀    ████████▀  ▄█████████▀  
-                                                                                                                                             
-                                                                                                
-EOF
+\033[32m███\033[36m╗   \033[32m███\033[36m╗\033[32m██\033[36m╗\033[32m███\033[36m╗   \033[32m██\033[36m╗\033[32m██\033[36m╗     \033[32m██████\033[36m╗  \033[32m█████\033[36m╗ \033[32m███\033[36m╗   \033[32m███\033[36m╗\033[32m███████\033[36m╗    \033[32m██\033[36m╗  \033[32m██\033[36m╗\033[32m██\033[36m╗   \033[32m██\033[36m╗\033[32m██████\033[36m╗ 
+\033[32m████\033[36m╗ \033[32m████\033[36m║\033[32m██\033[36m║\033[32m████\033[36m╗  \033[32m██\033[36m║\033[32m██\033[36m║    \033[32m██\033[36m╔════╝ \033[32m██\033[36m╔══\033[32m██\033[36m╗\033[32m████\033[36m╗ \033[32m████\033[36m║\033[32m██\033[36m╔════╝    \033[32m██\033[36m║  \033[32m██\033[36m║\033[32m██\033[36m║   \033[32m██\033[36m║\033[32m██\033[36m╔══\033[32m██\033[36m╗
+\033[32m██\033[36m╔\033[32m████\033[36m╔\033[32m██\033[36m║\033[32m██\033[36m║\033[32m██\033[36m╔\033[32m██\033[36m╗ \033[32m██\033[36m║\033[32m██\033[36m║    \033[32m██\033[36m║  \033[32m███\033[36m╗\033[32m███████\033[36m║\033[32m██\033[36m╔\033[32m████\033[36m╔\033[32m██\033[36m║\033[32m█████\033[36m╗      \033[32m███████\033[36m║\033[32m██\033[36m║   \033[32m██\033[36m║\033[32m██████\033[36m╔╝
+\033[32m██\033[36m║╚\033[32m██\033[36m╔╝\033[32m██\033[36m║\033[32m██\033[36m║\033[32m██\033[36m║╚\033[32m██\033[36m╗\033[32m██\033[36m║\033[32m██\033[36m║    \033[32m██\033[36m║   \033[32m██\033[36m║\033[32m██\033[36m╔══\033[32m██\033[36m║\033[32m██\033[36m║╚\033[32m██\033[36m╔╝\033[32m██\033[36m║\033[32m██\033[36m╔══╝      \033[32m██\033[36m╔══\033[32m██\033[36m║\033[32m██\033[36m║   \033[32m██\033[36m║\033[32m██\033[36m╔══\033[32m██\033[36m╗
+\033[32m██\033[36m║ ╚═╝ \033[32m██\033[36m║\033[32m██\033[36m║\033[32m██\033[36m║ ╚\033[32m████\033[36m║\033[32m██\033[36m║    ╚\033[32m██████\033[36m╔╝\033[32m██\033[36m║  \033[32m██\033[36m║\033[32m██\033[36m║ ╚═╝ \033[32m██\033[36m║\033[32m███████\033[36m╗    \033[32m██\033[36m║  \033[32m██\033[36m║╚\033[32m██████\033[36m╔╝\033[32m██████\033[36m╔╝
+╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝     ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝    ╚═╝  ╚═╝ ╚═════╝ ╚═════╝ 
+                                                                                                                                                                                                                                                                                                                         
+"
 }
+
+#lets person choose among several options and returns it
+#options given as arguments
 choose() {
-    tput civis
+    tput civis #hides cursor
     i=1
     for option in "$@"; do
         printf "\n\t\e[33m  $option\e[0m"
@@ -52,18 +60,21 @@ choose() {
         done
         read -rsn1 key
         if [[ -z $key ]]; then
-            tput cnorm
+            tput cnorm #cursor reappears
             return $i
-        elif [[ $key == "A" ]]; then
+        elif [[ $key == "A" ]]; then #A is for up
             ((i--))
-        elif [[ $key == "B" ]]; then
+        elif [[ $key == "B" ]]; then #B is for down
             ((i++))
         fi
-        ((i<1)) && ((i++))
+        ((i<1)) && ((i++))  #fix if go out of bounds
         ((i>$#)) && ((i--))
     done
 }
-signup() { #takes player number as argument
+
+#lets new user signup
+#takes player number as argument
+signup() {
     printtitle
     if (($1==1)); then
         printf "\033[1m\033[34msignup for first player\n\033[0m"
@@ -107,8 +118,8 @@ You can't change your password later so choose wisely!
 EOF
     printf "\033[36mEnter password: "
     local password
-    local pattern='^[a-zA-Z0-9_@#$%^&*]{8,20}$'
-    local patt='[_@#$%^&*]'
+    local valid_pattern='^[a-zA-Z0-9_@#$%^&*]{8,20}$'
+    local special_chars_pattern='[_@#$%^&*]'
     while true; do
         printf "\033[35m"
         password=$(readpass)
@@ -117,7 +128,7 @@ EOF
             printf "\033[2K\r\033[31mPassword must contain at least 8 characters!"
         elif ((${#password} >20 )); then
             printf "\033[2K\r\033[31mPassword must contain at most 20 characters!"
-        elif [[ ! "$password" =~ $pattern ]]; then
+        elif [[ ! "$password" =~ $valid_pattern ]]; then
             printf "\033[2K\r\033[31mPassword must not contain characters not mentioned above!"
         elif [[ ! "$password" =~ [a-z] ]]; then
             printf "\033[2K\r\033[31mPassword must contain at least 1 lowercase letter!"
@@ -125,7 +136,7 @@ EOF
             printf "\033[2K\r\033[31mPassword must contain at least 1 uppercase letter!"
         elif [[ ! "$password" =~ [0-9] ]]; then
             printf "\033[2K\r\033[31mPassword must contain at least 1 digit!"
-        elif [[ ! "$password" =~ $patt ]]; then
+        elif [[ ! "$password" =~ $special_chars_pattern ]]; then
             printf "\033[2K\r\033[31mPassword must contain at least 1 special character(_@#$%%^&*)!"
         else
             printf "\e[36mConfirm password: \033[35m"
@@ -141,8 +152,9 @@ EOF
     done
     printf "\033[2K\r\033[32mPassword successfully set!\n"
 
-    local expected=$(echo -n "$password" | sha256sum | awk '{print $1}')
-    echo -e "$username\t$expected" >> users.tsv
+    #stores the hash password in users.tsv
+    local hash=$(echo -n "$password" | sha256sum | awk '{print $1}')
+    echo -e "$username\t$hash" >> users.tsv
 
     if (($1==1)); then
         username1=$username
@@ -152,16 +164,20 @@ EOF
     printf "\033[32mPlayer logged in successfully!\n"
     choose "proceed"
 }
-checkpassword() { #takes username and player number as argument
+
+#checks password for a specific user
+#takes username and player number as arguments
+checkpassword() {
     local username="$1"
-    local expected=$(grep "^$username	" users.tsv | awk '{print $2}')
+    local hashexpected=$(grep "^$username	" users.tsv | awk '{print $2}')
     local password
     while true; do
         printf "\033[36mEnter password: \033[35m"
         password=$(readpass)
         printf "\n"
-        local pass=$(echo -n "$password" | sha256sum | awk '{print $1}')
-        if [[ "${expected}" == "${pass}" ]]; then
+        #hash of the password tried is stored into hashtried and later compared with hashexpected
+        local hashtried=$(echo -n "$password" | sha256sum | awk '{print $1}')
+        if [[ "${hashexpected}" == "${hashtried}" ]]; then
             printf "\033[32mPlayer logged in successfully!\n"
             choose "proceed"
             if (($2==1)); then
@@ -179,14 +195,23 @@ checkpassword() { #takes username and player number as argument
                 break
             fi
         fi
-        printf "\033[2K\r"
-        printf "\033[1A\033[2K\r"
-        printf "\033[1A\033[2K\r"
-        printf "\033[1A\033\r"
-        printf "\033[1A\033[2K\r"
+        #the following things is partially cleared using the next 5 printf statements \033[1A moves up the cursor:
+        #enter password: ••••••
+        #wrong password entered
+        #(blank line)
+        #try again
+        #go back to login/signup
+        printf "\033[2K"            #go back            #clear line
+        printf "\033[1A\033[2K"     #try again          #clear line
+        printf "\033[1A\033[2K"     #                   #clear line
+        printf "\033[1A"            #wrong password     #do not clear this line
+        printf "\033[1A\033[2K\r"   #Enter password:    #clear line, move to start
     done
 }
-login() { #takes player number as argument
+
+#reads username of the user while logging in and sends information to check password if username is correct
+#takes player number as argument
+login() {
     while true; do
         printtitle
         if (($1==1)); then
@@ -213,7 +238,10 @@ login() { #takes player number as argument
         fi
     done
 }
-loginsignup(){ #takes player number as argument
+
+#initial prompt to user regarding whether he wants to login or signup
+#takes player number as argument
+loginsignup(){
     printtitle
     if (($1==1)); then
         printf "\n\033[1m\033[34mHello first player!\n\033[0m"
@@ -229,6 +257,11 @@ loginsignup(){ #takes player number as argument
     fi
 }
 
+###########################################################
+################ START OF THE MAIN CODE ###################
+###########################################################
+
+################ SCENE 1: welcome ###################
 printtitle
 printf "\033[35m"
 cat << 'EOF'
@@ -241,8 +274,9 @@ ________________________________________________________________________________
 |May the best player win!                                                                      |
 |______________________________________________________________________________________________|
 EOF
-choose "START GAMEHUB"
+choose "PRESS ENTER"
 
+################ SCENE 2: prompt play or leaderboard ###################
 while true; do
     printtitle
     choose "play" "leaderboard"
@@ -257,13 +291,15 @@ while true; do
     fi
 done
 
+################ SCENE 3: loginsignup for 1st player ###################
 loginsignup 1
 
+################ SCENE 4: loginsignup for 2nd player ###################
 loginsignup 2
 
+################ SCENE 5: Final Scene ###################
 printtitle
-printf "\n\033[0mPlayer 1: ${username1}\nPlayer 2:3
- ${username2}\n"
+printf "\n\033[0mPlayer 1: ${username1}\nPlayer 2: ${username2}\n"
 cat << 'EOF'
       ___ ___    ___       ___     __              ___     __   ___  __         
 |    |__   |      |  |__| |__     / _`  /\   |\/| |__     |__) |__  / _` | |\ | 
@@ -271,4 +307,5 @@ cat << 'EOF'
 
 EOF
 
+################# RUNNING THE PYTHON ################
 python3 game.py "${username1}" "${username2}"
