@@ -139,9 +139,8 @@ EOF
         elif [[ ! "$password" =~ $special_chars_pattern ]]; then
             printf "\033[2K\r\033[31mPassword must contain at least 1 special character(_@#$%%^&*)!"
         else
-            printf "\e[36mConfirm password: \033[35m"
+            printf "\033[2K\r\033[36mConfirm password: \033[35m"
             local confirmpassword=$(readpass)
-            printf "\n"
             if [[ "$password" != "$confirmpassword" ]]; then
                 printf "\033[2K\r\033[31mPasswords do not match!"
             else
